@@ -34,7 +34,9 @@ export function createWorld(scene) {
     }
 
     // ЗАГРУЗКА OPENSTREETMAP
-    async function loadRealMap() {
+    async function loadRealMap().catch(error => {
+    alert("Ошибка карты: " + error.message);
+});
         const bbox = "38.535,68.735,38.585,68.835";
 
         const query = `
