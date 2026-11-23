@@ -1,246 +1,36 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>OPEN WORLD TAJIKISTAN 3D</title>
+// УПРАВЛЕНИЕ WASD + ANDROID
+const keys = {};
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+const keyMap = {
+  KeyA: 'left',
+  KeyD: 'right',
+  KeyW: 'forward',
+  KeyS: 'back'
+};
+
+window.addEventListener('keydown', e => {
+  if (keyMap[e.code]) {
+    keys[keyMap[e.code]] = true;
+    e.preventDefault();
   }
-}
-</script>
-
-<style>
-* {margin:0;padding:0;box-sizing:border-box}
-body {overflow:hidden;font-family:Arial}
-canvas {display:block}
-
-#title {
- position:absolute;top:15px;left:15px;
- color:white;font-size:19px;font-weight:bold;
- text-shadow:2px 2px 5px black;
-}
-
-#controls {
- position:absolute;bottom:25px;left:20px;
- display:flex;gap:10px;
-}
-
-button {
- border:2px solid white;border-radius:12px;
- padding:15px;background:#173c69;
- color:white;font-weight:bold;
-}
-
-#jump {
- position:absolute;bottom:35px;right:25px;
-}
-
-#info {
- position:absolute;top:50px;left:15px;
- color:white;text-shadow:1px 1px 4px black;
-}
-</style>
-</head>
-
-<body>
-
-<div id="title">OPEN WORLD TAJIKISTAN 🇹🇯</div>
-<div id="info">Режим: OFFLINE</div>
-
-<div id="controls">
-<button id="left">◀</button>
-<button id="forward">▲</button>
-<button id="back">▼</button>
-<button id="right">▶</button>
-</div>
-
-<button id="jump">JUMP</button>
-
-<script type="module">
-import * as THREE from 'three';
-
-// СЦЕНА
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb,60,180);
-
-// КАМЕРА
-const camera = new THREE.PerspectiveCamera(
-70,innerWidth/innerHeight,0.1,500
-);
-
-// РЕНДЕР
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-document.body.appendChild(renderer.domElement);
-
-// СВЕТ
-scene.add(new THREE.HemisphereLight(0xffffff,0x65734c,2));
-
-const sun = new THREE.DirectionalLight(0xffffff,2);
-sun.position.set(20,40,20);
-scene.add(sun);
-
-// ЗЕМЛЯ
-const ground = new THREE.Mesh(
-new THREE.PlaneGeometry(300,300),
-new THREE.MeshStandardMaterial({color:0x57934b})
-);
-ground.rotation.x=-Math.PI/2;
-scene.add(ground);
-
-// ДОРОГИ
-function road(x,z,w,d){
-const r=new THREE.Mesh(
-new THREE.BoxGeometry(w,.08,d),
-new THREE.MeshStandardMaterial({color:0x333333})
-);
-r.position.set(x,.04,z);
-scene.add(r);
-}
-road(0,0,300,12);
-road(0,0,12,300);
-
-// ДОМА
-function building(x,z,w,h,d,color){
-const b=new THREE.Mesh(
-new THREE.BoxGeometry(w,h,d),
-new THREE.MeshStandardMaterial({color})
-);
-b.position.set(x,h/2,z);
-scene.add(b);
-}
-
-for(let x=-50;x<=50;x+=25){
-for(let z=-50;z<=50;z+=25){
-if(Math.abs(x)<15 || Math.abs(z)<15)continue;
-building(x,z,10,8+Math.random()*15,10,0xd6c2a1);
-}
-}
-
-// ДЕРЕВЬЯ
-function tree(x,z){
-const trunk=new THREE.Mesh(
-new THREE.CylinderGeometry(.2,.3,2),
-new THREE.MeshStandardMaterial({color:0x70452a})
-);
-trunk.position.set(x,1,z);
-scene.add(trunk);
-
-const leaves=new THREE.Mesh(
-new THREE.SphereGeometry(1.5,8,8),
-new THREE.MeshStandardMaterial({color:0x247a35})
-);
-leaves.position.set(x,2.8,z);
-scene.add(leaves);
-}
-
-for(let i=0;i<60;i++){
-const x=(Math.random()-.5)*200;
-const z=(Math.random()-.5)*200;
-tree(x,z);
-}
-
-// ПЕРСОНАЖ
-const player=new THREE.Group();
-
-const body=new THREE.Mesh(
-new THREE.CapsuleGeometry(.45,.8,4,8),
-new THREE.MeshStandardMaterial({color:0x1769aa})
-);
-body.position.y=1;
-player.add(body);
-
-const head=new THREE.Mesh(
-new THREE.SphereGeometry(.3,12,12),
-new THREE.MeshStandardMaterial({color:0xe5b58c})
-);
-head.position.y=1.8;
-player.add(head);
-
-player.position.set(0,0,5);
-scene.add(player);
-
-// УПРАВЛЕНИЕ
-const keys={};
-
-['left','right','forward','back'].forEach(id=>{
-const btn=document.getElementById(id);
-
-btn.addEventListener('pointerdown',e=>{
-e.preventDefault();
-keys[id]=true;
 });
 
-['pointerup','pointerleave','pointercancel'].forEach(event=>{
-btn.addEventListener(event,()=>keys[id]=false);
-});
-});
-
-// ПРЫЖОК
-let velocityY=0;
-let grounded=true;
-
-document.getElementById('jump').addEventListener('pointerdown',()=>{
-if(grounded){
-velocityY=7;
-grounded=false;
-}
+window.addEventListener('keyup', e => {
+  if (keyMap[e.code]) {
+    keys[keyMap[e.code]] = false;
+    e.preventDefault();
+  }
 });
 
-// ИГРОВОЙ ЦИКЛ
-function animate(){
-requestAnimationFrame(animate);
+['left','right','forward','back'].forEach(id => {
+  const btn = document.getElementById(id);
 
-const speed=.13;
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    keys[id] = true;
+  });
 
-if(keys.forward)player.position.z-=speed;
-if(keys.back)player.position.z+=speed;
-if(keys.left)player.position.x-=speed;
-if(keys.right)player.position.x+=speed;
-
-velocityY-=.025;
-player.position.y+=velocityY;
-
-if(player.position.y<0){
-player.position.y=0;
-velocityY=0;
-grounded=true;
-}
-
-player.position.x=THREE.MathUtils.clamp(player.position.x,-140,140);
-player.position.z=THREE.MathUtils.clamp(player.position.z,-140,140);
-
-camera.position.set(
-player.position.x,
-player.position.y+5,
-player.position.z+9
-);
-
-camera.lookAt(
-player.position.x,
-player.position.y+1,
-player.position.z
-);
-
-renderer.render(scene,camera);
-}
-
-animate();
-
-// АДАПТАЦИЯ ЭКРАНА
-window.addEventListener('resize',()=>{
-camera.aspect=innerWidth/innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(innerWidth,innerHeight);
+  ['pointerup','pointerleave','pointercancel'].forEach(event => {
+    btn.addEventListener(event, () => keys[id] = false);
+  });
 });
-
-</script>
-</body>
-</html>
-
