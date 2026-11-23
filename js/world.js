@@ -256,7 +256,7 @@ export function createWorld(scene) {
         );
 
         const notice = document.createElement("div");
-        notice.textContent = "Карта: © OpenStreetMap contributors";
+        notice.textContent = "Дороги: " + roadCount + " | Дома: " + buildingCount;
         notice.style.cssText =
             "position:absolute;bottom:5px;right:5px;" +
             "color:white;background:#0008;padding:4px;" +
