@@ -346,17 +346,17 @@ function animate() {
     controlled.position.z,-190,190
   );
 
-  camera.position.set(
-    controlled.position.x,
-    controlled.position.y+5,
-    controlled.position.z+9
-  );
+  const targetX = controlled.position.x;
+const targetY = controlled.position.y + 1;
+const targetZ = controlled.position.z;
 
-  camera.lookAt(
-    controlled.position.x,
-    controlled.position.y+1,
-    controlled.position.z
-  );
+camera.position.set(
+  targetX + Math.sin(mouseX) * cameraDistance,
+  targetY + 5 + mouseY * 4,
+  targetZ + Math.cos(mouseX) * cameraDistance
+);
+
+camera.lookAt(targetX, targetY, targetZ);
 
   renderer.render(scene,camera);
 }
