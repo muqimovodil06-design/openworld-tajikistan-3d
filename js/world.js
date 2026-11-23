@@ -71,10 +71,10 @@ export function createWorld(scene) {
             }
         }
 
-        if (!data || !data.elements) {
-            console.warn("Карта временно недоступна.");
-            return;
-        }
+       if (!data || !data.elements) {
+    alert("ОШИБКА: карта Душанбе не загрузилась. Проверь интернет.");
+    return;
+}
 
         const roadMaterial = new THREE.MeshStandardMaterial({
             color: 0x34383d,
