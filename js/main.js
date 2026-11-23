@@ -73,7 +73,7 @@ async function startGame() {
 
         const clock = new THREE.Clock();
 
-        const world = createWorld(scene);
+        const world = await createWorld(scene);
         const player = createPlayer(scene);
         const vehicles = createVehicles(scene);
         const npcs = createNPCs(scene);
