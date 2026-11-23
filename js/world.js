@@ -76,11 +76,11 @@ export function createWorld(scene) {
     return;
 }
 
-        const roadMaterial = new THREE.MeshStandardMaterial({
-            color: 0x34383d,
-            roughness: 1
-        });
-
+       const roadMaterial = new THREE.MeshStandardMaterial({
+    color: 0x34383d,
+    roughness: 1,
+    side: THREE.DoubleSide
+});
         const parkMaterial = new THREE.MeshStandardMaterial({
             color: 0x397b43,
             side: THREE.DoubleSide
