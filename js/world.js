@@ -59,13 +59,9 @@ export function createWorld(scene) {
 
         for (const endpoint of endpoints) {
             try {
-                const response = await fetch(endpoint, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: "data=" + encodeURIComponent(query)
-                });
+                const response = await fetch(
+               endpoint + "?data=" + encodeURIComponent(query)
+               );
 
                 if (!response.ok) continue;
 
