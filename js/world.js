@@ -52,8 +52,7 @@ export function createWorld(scene) {
     "https://overpass.ch/api/interpreter",
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter"
-];
-        ];
+ ];
 
         let data = null;
 
