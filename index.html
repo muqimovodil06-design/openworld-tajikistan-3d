@@ -84,6 +84,30 @@ scene.background = new THREE.Color(0x87ceeb);
 scene.fog = new THREE.Fog(0x87ceeb, 70, 230);
 
 // КАМЕРА
+  // УПРАВЛЕНИЕ МЫШКОЙ
+let mouseX = 0;
+let mouseY = 0;
+let cameraDistance = 9;
+
+document.addEventListener('mousemove', (e) => {
+  if (document.pointerLockElement === renderer.domElement) {
+    mouseX -= e.movementX * 0.003;
+    mouseY += e.movementY * 0.003;
+    mouseY = THREE.MathUtils.clamp(mouseY, -0.5, 1);
+  }
+});
+
+renderer.domElement.addEventListener('click', () => {
+  if (window.matchMedia('(pointer:fine)').matches) {
+    renderer.domElement.requestPointerLock();
+  }
+});
+
+document.addEventListener('wheel', (e) => {
+  cameraDistance = THREE.MathUtils.clamp(
+    cameraDistance + e.deltaY * 0.01, 4, 18
+  );
+});
 const camera = new THREE.PerspectiveCamera(
   70, innerWidth / innerHeight, 0.1, 500
 );
