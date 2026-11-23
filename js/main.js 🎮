@@ -57,7 +57,7 @@ const cameraSystem = createCamera(
 );
 
 const camera = cameraSystem.camera;
-const dayNight = createDayNight(scene);
+const dayNight = createDayNight(scene, world);
 
 function resizeGame() {
     camera.aspect = window.innerWidth / window.innerHeight;
