@@ -3,111 +3,109 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>OPEN WORLD TAJIKISTAN 3D</title>
-
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
-  }
-}
-</script>
 
 <style>
 * { box-sizing:border-box; }
 body {
   margin:0;
   overflow:hidden;
-  font-family:Arial;
-  touch-action:none;
+  font-family:Arial,sans-serif;
+  background:#87ceeb;
 }
-canvas { display:block; }
+canvas {
+  display:block;
+}
 #title {
-  position:absolute; top:12px; left:12px;
-  color:white; font-weight:bold;
-  font-size:18px; text-shadow:2px 2px 5px black;
-}
-#info {
-  position:absolute; top:42px; left:12px;
-  color:white; text-shadow:1px 1px 4px black;
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-weight:bold;
+  font-size:18px;
+  text-shadow:2px 2px 4px black;
+  pointer-events:none;
+  white-space:nowrap;
 }
 #controls {
-  position:absolute; bottom:20px; left:12px;
+  position:absolute;
+  bottom:20px;
+  left:20px;
   display:grid;
   grid-template-columns:55px 55px 55px;
-  gap:7px;
+  gap:5px;
 }
 button {
   border:2px solid white;
   border-radius:12px;
-  background:#173c69;
+  background:#222a;
   color:white;
+  font-size:20px;
   font-weight:bold;
-  font-size:18px;
-  padding:13px;
+  padding:12px;
   touch-action:none;
 }
-#jump {
-  position:absolute; bottom:25px; right:15px;
+#controls button {
+  width:55px;
+  height:55px;
 }
-#carBtn {
-  position:absolute; bottom:90px; right:15px;
-  background:#b51d1d;
-  font-size:15px;
+#up { grid-column:2; }
+#left { grid-column:1; }
+#down { grid-column:2; }
+#right { grid-column:3; }
+
+#actions {
+  position:absolute;
+  bottom:25px;
+  right:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+#actions button {
+  font-size:14px;
+  min-width:85px;
+}
+#info {
+  position:absolute;
+  top:42px;
+  left:10px;
+  color:white;
+  text-shadow:1px 1px 3px black;
+  font-size:13px;
 }
 </style>
 </head>
 
 <body>
-<div id="title">OPEN WORLD TAJIKISTAN 🇹🇯</div>
-<div id="info">Режим: Пешком</div>
+
+<div id="title">🇹🇯 OPEN WORLD TAJIKISTAN 3D</div>
+<div id="info">WASD — движение | SPACE — прыжок | Мышь — камера</div>
 
 <div id="controls">
-  <div></div>
-  <button id="forward">W ▲</button>
-  <div></div>
-  <button id="left">A ◀</button>
-  <button id="back">S ▼</button>
-  <button id="right">D ▶</button>
+  <button id="up">▲</button>
+  <button id="left">◀</button>
+  <button id="down">▼</button>
+  <button id="right">▶</button>
 </div>
 
-<button id="jump">JUMP</button>
-<button id="carBtn">🚗 СЕСТЬ В МАШИНУ</button>
+<div id="actions">
+  <button id="jump">ПРЫЖОК</button>
+  <button id="carBtn">МАШИНА</button>
+  <button id="exitCar">ВЫЙТИ</button>
+</div>
 
 <script type="module">
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 // СЦЕНА
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb, 70, 230);
+scene.fog = new THREE.Fog(0x87ceeb, 60, 180);
 
 // КАМЕРА
-  // УПРАВЛЕНИЕ МЫШКОЙ
-let mouseX = 0;
-let mouseY = 0;
-let cameraDistance = 9;
-
-document.addEventListener('mousemove', (e) => {
-  if (document.pointerLockElement === renderer.domElement) {
-    mouseX -= e.movementX * 0.003;
-    mouseY += e.movementY * 0.003;
-    mouseY = THREE.MathUtils.clamp(mouseY, -0.5, 1);
-  }
-});
-
-renderer.domElement.addEventListener('click', () => {
-  if (window.matchMedia('(pointer:fine)').matches) {
-    renderer.domElement.requestPointerLock();
-  }
-});
-
-document.addEventListener('wheel', (e) => {
-  cameraDistance = THREE.MathUtils.clamp(
-    cameraDistance + e.deltaY * 0.01, 4, 18
-  );
-});
 const camera = new THREE.PerspectiveCamera(
   70, innerWidth / innerHeight, 0.1, 500
 );
@@ -119,251 +117,313 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 document.body.appendChild(renderer.domElement);
 
 // СВЕТ
-scene.add(new THREE.HemisphereLight(0xffffff, 0x65734c, 2));
+scene.add(new THREE.HemisphereLight(0xffffff, 0x557744, 2));
 
 const sun = new THREE.DirectionalLight(0xffffff, 2);
-sun.position.set(30, 50, 20);
+sun.position.set(30,50,20);
 scene.add(sun);
 
 // ЗЕМЛЯ
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(400, 400),
-  new THREE.MeshStandardMaterial({color:0x57934b})
+  new THREE.PlaneGeometry(300,300),
+  new THREE.MeshStandardMaterial({color:0x579447})
 );
-ground.rotation.x = -Math.PI / 2;
+ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-// ГОРЫ
-function mountain(x, z, size, height) {
-  const mesh = new THREE.Mesh(
-    new THREE.ConeGeometry(size, height, 5),
-    new THREE.MeshStandardMaterial({color:0x777777})
-  );
-  mesh.position.set(x, height / 2 - 2, z);
-  scene.add(mesh);
-}
-for (let i=0; i<25; i++) {
-  mountain(
-    (Math.random()-.5)*350,
-    (Math.random()-.5)*350,
-    12+Math.random()*20,
-    20+Math.random()*35
-  );
-}
-
-// ДОРОГИ
-function road(x,z,w,d) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(w,0.08,d),
+// ДОРОГА
+function makeRoad(x,z,w,h) {
+  const road = new THREE.Mesh(
+    new THREE.PlaneGeometry(w,h),
     new THREE.MeshStandardMaterial({color:0x333333})
   );
-  mesh.position.set(x,0.04,z);
-  scene.add(mesh);
+  road.rotation.x = -Math.PI/2;
+  road.position.set(x,0.02,z);
+  scene.add(road);
 }
-road(0,0,400,12);
-road(0,0,12,400);
+makeRoad(0,0,300,12);
+makeRoad(0,0,12,300);
+
+// РАЗМЕТКА
+for(let i=-140;i<=140;i+=12) {
+  const line = new THREE.Mesh(
+    new THREE.PlaneGeometry(4,0.25),
+    new THREE.MeshBasicMaterial({color:0xffffff})
+  );
+  line.rotation.x=-Math.PI/2;
+  line.position.set(i,0.04,0);
+  scene.add(line);
+}
+
+// ГОРЫ
+for(let i=0;i<18;i++) {
+  const mountain = new THREE.Mesh(
+    new THREE.ConeGeometry(12+Math.random()*12,25+Math.random()*25,5),
+    new THREE.MeshStandardMaterial({color:0x777777})
+  );
+  mountain.position.set(
+    (Math.random()-0.5)*250,
+    12,
+    -100-Math.random()*90
+  );
+  scene.add(mountain);
+}
 
 // ДОМА
-function building(x,z,w,h,d) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(w,h,d),
-    new THREE.MeshStandardMaterial({color:0xd6c2a1})
+function createHouse(x,z) {
+  const house = new THREE.Group();
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(8,5,8),
+    new THREE.MeshStandardMaterial({color:0xe4d2aa})
   );
-  mesh.position.set(x,h/2,z);
-  scene.add(mesh);
+  body.position.y=2.5;
+  house.add(body);
+
+  const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(6,3,4),
+    new THREE.MeshStandardMaterial({color:0x9d3828})
+  );
+  roof.position.y=6.5;
+  roof.rotation.y=Math.PI/4;
+  house.add(roof);
+
+  house.position.set(x,0,z);
+  scene.add(house);
 }
-for (let x=-70; x<=70; x+=25) {
-  for (let z=-70; z<=70; z+=25) {
-    if (Math.abs(x)<15 || Math.abs(z)<15) continue;
-    building(x,z,10,8+Math.random()*12,10);
+
+for(let x=-80;x<=80;x+=25) {
+  for(let z=-70;z<=70;z+=30) {
+    if(Math.abs(x)>12 && Math.abs(z)>12) {
+      createHouse(x,z);
+    }
   }
 }
 
 // ДЕРЕВЬЯ
-function tree(x,z) {
+function createTree(x,z) {
+  const tree = new THREE.Group();
+
   const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(.2,.3,2),
-    new THREE.MeshStandardMaterial({color:0x70452a})
+    new THREE.CylinderGeometry(0.4,0.6,3),
+    new THREE.MeshStandardMaterial({color:0x754321})
   );
-  trunk.position.set(x,1,z);
-  scene.add(trunk);
+  trunk.position.y=1.5;
+  tree.add(trunk);
 
   const leaves = new THREE.Mesh(
-    new THREE.SphereGeometry(1.5,8,8),
-    new THREE.MeshStandardMaterial({color:0x247a35})
+    new THREE.ConeGeometry(2.5,6,8),
+    new THREE.MeshStandardMaterial({color:0x176b29})
   );
-  leaves.position.set(x,2.8,z);
-  scene.add(leaves);
-}
-for (let i=0;i<80;i++) {
-  tree((Math.random()-.5)*300,(Math.random()-.5)*300);
+  leaves.position.y=5;
+  tree.add(leaves);
+
+  tree.position.set(x,0,z);
+  scene.add(tree);
 }
 
-// ПЕРСОНАЖ
+for(let i=0;i<100;i++) {
+  let x=(Math.random()-0.5)*240;
+  let z=(Math.random()-0.5)*240;
+  if(Math.abs(x)>10 && Math.abs(z)>10) createTree(x,z);
+}
+
+// ИГРОК
 const player = new THREE.Group();
 
 const body = new THREE.Mesh(
-  new THREE.CapsuleGeometry(.45,.8,4,8),
-  new THREE.MeshStandardMaterial({color:0x1769aa})
+  new THREE.BoxGeometry(1,1.8,0.7),
+  new THREE.MeshStandardMaterial({color:0x2255ff})
 );
-body.position.y=1;
+body.position.y=1.5;
 player.add(body);
 
 const head = new THREE.Mesh(
-  new THREE.SphereGeometry(.3,12,12),
-  new THREE.MeshStandardMaterial({color:0xe5b58c})
+  new THREE.SphereGeometry(0.45,16,16),
+  new THREE.MeshStandardMaterial({color:0xffcc99})
 );
-head.position.y=1.8;
+head.position.y=2.7;
 player.add(head);
 
-player.position.set(0,0,5);
+player.position.set(0,0,8);
 scene.add(player);
 
 // МАШИНА
 const car = new THREE.Group();
 
 const carBody = new THREE.Mesh(
-  new THREE.BoxGeometry(2.4,.8,4),
-  new THREE.MeshStandardMaterial({color:0xff2222})
+  new THREE.BoxGeometry(2.5,1,4.5),
+  new THREE.MeshStandardMaterial({color:0xdd2222})
 );
-carBody.position.y=.8;
+carBody.position.y=0.8;
 car.add(carBody);
 
 const cabin = new THREE.Mesh(
-  new THREE.BoxGeometry(1.7,.9,2),
-  new THREE.MeshStandardMaterial({color:0x333333})
+  new THREE.BoxGeometry(2,0.9,2),
+  new THREE.MeshStandardMaterial({color:0x222222})
 );
-cabin.position.set(0,1.6,-.2);
+cabin.position.set(0,1.7,-0.3);
 car.add(cabin);
 
-for (const x of [-1.2,1.2]) {
-  for (const z of [-1.2,1.2]) {
+for(const x of [-1.3,1.3]) {
+  for(const z of [-1.4,1.4]) {
     const wheel = new THREE.Mesh(
-      new THREE.CylinderGeometry(.4,.4,.3,16),
+      new THREE.CylinderGeometry(0.5,0.5,0.35,16),
       new THREE.MeshStandardMaterial({color:0x111111})
     );
     wheel.rotation.z=Math.PI/2;
-    wheel.position.set(x,.4,z);
+    wheel.position.set(x,0.5,z);
     car.add(wheel);
   }
 }
 
-car.position.set(4,0,5);
+car.position.set(5,0,8);
 scene.add(car);
 
-// УПРАВЛЕНИЕ
+// УПРАВЛЕНИЕ МЫШКОЙ
+let mouseX = 0;
+let mouseY = 0;
+let cameraDistance = 9;
+
+renderer.domElement.addEventListener('click', () => {
+  if(window.matchMedia('(pointer:fine)').matches) {
+    renderer.domElement.requestPointerLock();
+  }
+});
+
+document.addEventListener('mousemove', e => {
+  if(document.pointerLockElement === renderer.domElement) {
+    mouseX -= e.movementX*0.003;
+    mouseY += e.movementY*0.003;
+    mouseY = THREE.MathUtils.clamp(mouseY,-0.5,1);
+  }
+});
+
+document.addEventListener('wheel', e => {
+  cameraDistance = THREE.MathUtils.clamp(
+    cameraDistance+e.deltaY*0.01,4,18
+  );
+});
+
+// КНОПКИ
 const keys = {};
 
-const keyMap = {
-  KeyA:'left',
-  KeyD:'right',
-  KeyW:'forward',
-  KeyS:'back'
-};
+function setKey(name,value) {
+  keys[name]=value;
+}
 
-window.addEventListener('keydown',e=>{
-  if(keyMap[e.code]) {
-    keys[keyMap[e.code]]=true;
-    e.preventDefault();
-  }
+document.addEventListener('keydown',e => {
+  keys[e.code]=true;
+});
+document.addEventListener('keyup',e => {
+  keys[e.code]=false;
 });
 
-window.addEventListener('keyup',e=>{
-  if(keyMap[e.code]) {
-    keys[keyMap[e.code]]=false;
-    e.preventDefault();
-  }
-});
-
-['left','right','forward','back'].forEach(id=>{
+function bindButton(id,key) {
   const btn=document.getElementById(id);
   btn.addEventListener('pointerdown',e=>{
     e.preventDefault();
-    keys[id]=true;
+    setKey(key,true);
   });
   ['pointerup','pointerleave','pointercancel'].forEach(event=>{
-    btn.addEventListener(event,()=>keys[id]=false);
+    btn.addEventListener(event,()=>setKey(key,false));
   });
-});
+}
 
-// ПРЫЖОК
-let velocityY=0;
-let grounded=true;
+bindButton('up','KeyW');
+bindButton('down','KeyS');
+bindButton('left','KeyA');
+bindButton('right','KeyD');
+bindButton('jump','Space');
 
-document.getElementById('jump').addEventListener('pointerdown',()=>{
-  if(!driving && grounded) {
-    velocityY=7;
-    grounded=false;
-  }
-});
+// МАШИНА
+let inCar=false;
 
-// МАШИНА: СЕСТЬ И ВЫЙТИ
-let driving=false;
-
-document.getElementById('carBtn').addEventListener('click',()=>{
-  driving=!driving;
-
-  if(driving) {
+document.getElementById('carBtn').onclick=()=>{
+  if(!inCar) {
+    inCar=true;
     player.visible=false;
-    car.visible=true;
-    document.getElementById('carBtn').textContent='ВЫЙТИ ИЗ МАШИНЫ';
-    document.getElementById('info').textContent='Режим: За рулём 🚗';
-  } else {
-    player.position.set(car.position.x+2,0,car.position.z);
-    player.visible=true;
-    document.getElementById('carBtn').textContent='🚗 СЕСТЬ В МАШИНУ';
-    document.getElementById('info').textContent='Режим: Пешком';
+    car.position.copy(player.position);
   }
-});
+};
 
-// ДВИЖЕНИЕ
+document.getElementById('exitCar').onclick=()=>{
+  if(inCar) {
+    inCar=false;
+    player.position.copy(car.position);
+    player.position.x+=3;
+    player.visible=true;
+  }
+};
+
+// ФИЗИКА
+let velocityY=0;
+let onGround=true;
+
 function animate() {
   requestAnimationFrame(animate);
 
-  const controlled = driving ? car : player;
-  const speed = driving ? .3 : .13;
+  const speed=inCar?0.22:0.12;
+  const moving=new THREE.Vector3();
 
-  if(keys.forward) controlled.position.z-=speed;
-  if(keys.back) controlled.position.z+=speed;
-  if(keys.left) controlled.position.x-=speed;
-  if(keys.right) controlled.position.x+=speed;
+  if(keys.KeyW) moving.z-=1;
+  if(keys.KeyS) moving.z+=1;
+  if(keys.KeyA) moving.x-=1;
+  if(keys.KeyD) moving.x+=1;
 
-  if(!driving) {
-    velocityY-=.025;
+  moving.normalize();
+
+  const target=inCar?car:player;
+
+  if(moving.length()>0) {
+    const angle=Math.atan2(moving.x,moving.z);
+    target.rotation.y=angle+mouseX;
+    const direction=new THREE.Vector3(
+      Math.sin(target.rotation.y),0,
+      Math.cos(target.rotation.y)
+    );
+    target.position.addScaledVector(direction,-speed);
+  }
+
+  if(!inCar) {
+    if(keys.Space && onGround) {
+      velocityY=0.22;
+      onGround=false;
+    }
+
+    velocityY-=0.009;
     player.position.y+=velocityY;
 
-    if(player.position.y<0) {
+    if(player.position.y<=0) {
       player.position.y=0;
       velocityY=0;
-      grounded=true;
+      onGround=true;
     }
   }
 
-  controlled.position.x=THREE.MathUtils.clamp(
-    controlled.position.x,-190,190
-  );
-  controlled.position.z=THREE.MathUtils.clamp(
-    controlled.position.z,-190,190
-  );
+  // КАМЕРА
+  const cameraTarget=inCar?car:player;
+  const angle=mouseX;
+  const horizontal=cameraDistance*Math.cos(mouseY);
 
   camera.position.set(
-  controlled.position.x,
-  controlled.position.y + 5,
-  controlled.position.z + 9
-);
+    cameraTarget.position.x+Math.sin(angle)*horizontal,
+    cameraTarget.position.y+4+Math.sin(mouseY)*cameraDistance,
+    cameraTarget.position.z+Math.cos(angle)*horizontal
+  );
 
-camera.lookAt(
-  controlled.position.x,
-  controlled.position.y + 1,
-  controlled.position.z
-);
+  camera.lookAt(
+    cameraTarget.position.x,
+    cameraTarget.position.y+1.5,
+    cameraTarget.position.z
+  );
 
   renderer.render(scene,camera);
 }
 
 animate();
 
-// РАЗМЕР ЭКРАНА
+// ИЗМЕНЕНИЕ РАЗМЕРА
 window.addEventListener('resize',()=>{
   camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
