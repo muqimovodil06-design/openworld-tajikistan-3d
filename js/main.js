@@ -146,4 +146,18 @@ async function startGame() {
     }
 }
 
+window.addEventListener("error", (event) => {
+    const loading = document.getElementById("loading");
+    if (loading) {
+        loading.innerHTML = "ОШИБКА: " + event.message;
+    }
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+    const loading = document.getElementById("loading");
+    if (loading) {
+        loading.innerHTML = "ОШИБКА МОДУЛЯ: " + event.reason;
+    }
+});
+
 startGame();
