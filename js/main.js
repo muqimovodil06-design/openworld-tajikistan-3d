@@ -75,7 +75,7 @@ async function startGame() {
 
         const world = createWorld(scene);
         const player = createPlayer(scene);
-        const vehicles = createVehicles(scene);
+        const vehicles = createVehicles(scene, world);
         const npcs = createNPCs(scene);
         const controls = setupControls();
 
