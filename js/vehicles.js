@@ -162,104 +162,63 @@ export function createVehicles(scene, world) {
 
     function update(delta, controls, player) {
 
-    // АВТОМАТИЧЕСКОЕ ДВИЖЕНИЕ МАШИН
-    for (const vehicle of vehicles) {
-        if (vehicle === activeVehicle) continue;
+  // ДВИЖЕНИЕ МАШИН ПО ДОРОГАМ
+const roadPaths = world?.userData?.roadPaths || [];
+const usablePaths = roadPaths.filter(
+    path => path.points && path.points.length >= 2
+);
 
-        if (vehicle.aiAngle === undefined) {
-            vehicle.aiAngle = Math.random() * Math.PI * 2;
-            vehicle.aiRadius = 10 + Math.random() * 8;
-        }
+for (const vehicle of vehicles) {
+    if (vehicle === activeVehicle) continue;
 
-        vehicle.aiAngle += delta * 0.3;
+    // Ждём, пока загрузится карта
+    if (usablePaths.length === 0) continue;
 
-        vehicle.object.position.x =
-            vehicle.startX +
-            Math.cos(vehicle.aiAngle) * vehicle.aiRadius;
+    // Выбираем дорожный маршрут
+    if (!vehicle.aiPath) {
+        vehicle.aiPath =
+            usablePaths[Math.floor(Math.random() * usablePaths.length)];
 
-        vehicle.object.position.z =
-            vehicle.startZ +
-            Math.sin(vehicle.aiAngle) * vehicle.aiRadius;
-
-        vehicle.object.rotation.y =
-            -vehicle.aiAngle - Math.PI / 2;
-
-        for (const wheel of vehicle.wheels) {
-            wheel.rotation.x += delta * 2;
-        }
-    }
-
-    // ПОСАДКА И ВЫХОД
-    if (controls.enterPressed) {
-        if (activeVehicle) {
-            player.position.copy(activeVehicle.object.position);
-            player.position.x += 3;
-            activeVehicle = null;
-            player.mesh.visible = true;
-        } else {
-            const vehicle = nearestVehicle(player);
-
-            if (vehicle) {
-                activeVehicle = vehicle;
-                player.mesh.visible = false;
-                showVehicleMessage(vehicle.name);
-            }
-        }
-
-        controls.enterPressed = false;
-    }
-
-    // УПРАВЛЕНИЕ МАШИНОЙ ИГРОКА
-    if (activeVehicle) {
-        const vehicle = activeVehicle;
-
-        if (controls.forward) vehicle.speed += 18 * delta;
-        if (controls.backward) vehicle.speed -= 18 * delta;
-
-        vehicle.speed = THREE.MathUtils.clamp(
-            vehicle.speed,
-            -vehicle.maxSpeed * 0.5,
-            vehicle.maxSpeed
+        vehicle.aiIndex = Math.floor(
+            Math.random() * vehicle.aiPath.points.length
         );
 
-        vehicle.speed *= controls.handbrake ? 0.88 : 0.99;
+        vehicle.aiDirection = Math.random() < 0.5 ? 1 : -1;
+        vehicle.aiSpeed = 7 + Math.random() * 5;
 
-        if (controls.left) {
-            vehicle.object.rotation.y += vehicle.turnSpeed * delta *
-                Math.sign(vehicle.speed || 1);
-        }
+        const start = vehicle.aiPath.points[vehicle.aiIndex];
+        vehicle.object.position.set(start.x, 0, start.z);
+    }
 
-        if (controls.right) {
-            vehicle.object.rotation.y -= vehicle.turnSpeed * delta *
-                Math.sign(vehicle.speed || 1);
-        }
+    const path = vehicle.aiPath.points;
 
-        vehicle.object.position.x +=
-            Math.sin(vehicle.object.rotation.y) * vehicle.speed * delta;
+    let nextIndex = vehicle.aiIndex + vehicle.aiDirection;
 
-        vehicle.object.position.z +=
-            Math.cos(vehicle.object.rotation.y) * vehicle.speed * delta;
+    if (nextIndex >= path.length || nextIndex < 0) {
+        vehicle.aiDirection *= -1;
+        nextIndex = vehicle.aiIndex + vehicle.aiDirection;
+    }
+
+    const target = path[nextIndex];
+    const dx = target.x - vehicle.object.position.x;
+    const dz = target.z - vehicle.object.position.z;
+    const distance = Math.sqrt(dx * dx + dz * dz);
+
+    if (distance < 1.5) {
+        vehicle.aiIndex = nextIndex;
+    } else {
+        vehicle.object.rotation.y = Math.atan2(dx, dz);
+
+        const step = Math.min(
+            vehicle.aiSpeed * delta,
+            distance
+        );
+
+        vehicle.object.position.x += dx / distance * step;
+        vehicle.object.position.z += dz / distance * step;
 
         for (const wheel of vehicle.wheels) {
-            wheel.rotation.x += vehicle.speed * delta;
-        }
-
-        player.position.copy(vehicle.object.position);
-    }
-}
-    function showVehicleMessage(name) {
-        const message = document.getElementById("message");
-        if (message) {
-            message.textContent = "Транспорт: " + name;
-            message.style.display = "block";
+            wheel.rotation.x += step / 0.48;
         }
     }
-
-    return {
-        list: vehicles,
-        update,
-        get activeVehicle() {
-            return activeVehicle;
-        }
-    };
 }
