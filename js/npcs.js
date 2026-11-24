@@ -172,3 +172,8 @@ export function createNPCs(scene) {
         person.rightLeg.rotation.x = walking * 0.5;
     }
 }
+    return {
+        people,
+        update
+    };
+}
