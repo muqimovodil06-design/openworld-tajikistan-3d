@@ -105,10 +105,12 @@ export function createVehicles(scene) {
         car.position.set(x, 0, z);
 
         const vehicle = {
-            name,
-            object: car,
-            wheels,
-            speed: 0,
+    name,
+    object: car,
+    wheels,
+    startX: x,
+    startZ: z,
+    speed: 0,
             maxSpeed: type === "bus" ? 18 : 30,
             turnSpeed: 1.8,
             type
