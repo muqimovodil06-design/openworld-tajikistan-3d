@@ -151,34 +151,24 @@ export function createNPCs(scene) {
     createPerson(roles[10], -80, -80);
 
     // ОБНОВЛЕНИЕ NPC
-    function update(delta) {
-        for (const person of people) {
-            person.phase += delta * (
-                person.patrol ? 2 : 0.8
-            );
+   function update(delta) {
+    for (const person of people) {
+        person.phase += delta * (person.patrol ? 2 : 0.8);
 
-            if (person.patrol) {
-                person.group.position.x =
-                    person.startX +
-                    Math.sin(person.phase) * 8;
+        const radius = person.patrol ? 8 : 3;
 
-                person.group.position.z =
-                    person.startZ +
-                    Math.cos(person.phase) * 8;
-            }
+        person.group.position.x =
+            person.startX + Math.sin(person.phase) * radius;
 
-            const walking = Math.sin(person.phase);
+        person.group.position.z =
+            person.startZ + Math.cos(person.phase) * radius;
 
-            person.leftArm.rotation.x = walking * 0.35;
-            person.rightArm.rotation.x = -walking * 0.35;
+        const walking = Math.sin(person.phase * 2);
 
-            person.leftLeg.rotation.x = -walking * 0.35;
-            person.rightLeg.rotation.x = walking * 0.35;
-        }
+        person.leftArm.rotation.x = walking * 0.5;
+        person.rightArm.rotation.x = -walking * 0.5;
+
+        person.leftLeg.rotation.x = -walking * 0.5;
+        person.rightLeg.rotation.x = walking * 0.5;
     }
-
-    return {
-        people,
-        update
-    };
 }
