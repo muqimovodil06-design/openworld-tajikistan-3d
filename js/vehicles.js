@@ -161,78 +161,92 @@ export function createVehicles(scene) {
     }
 
     function update(delta, controls, player) {
-        // ПОСАДКА И ВЫХОД
-        if (controls.enterPressed) {
-            if (activeVehicle) {
-                player.position.copy(activeVehicle.object.position);
-                player.position.x += 3;
-                activeVehicle = null;
-                player.mesh.visible = true;
-            } else {
-                const vehicle = nearestVehicle(player);
 
-                if (vehicle) {
-                    activeVehicle = vehicle;
-                    player.mesh.visible = false;
-                    showVehicleMessage(vehicle.name);
-                }
-            }
+    // АВТОМАТИЧЕСКОЕ ДВИЖЕНИЕ МАШИН
+    for (const vehicle of vehicles) {
+        if (vehicle === activeVehicle) continue;
 
-            controls.enterPressed = false;
+        if (vehicle.aiAngle === undefined) {
+            vehicle.aiAngle = Math.random() * Math.PI * 2;
+            vehicle.aiRadius = 10 + Math.random() * 8;
         }
 
-        // УПРАВЛЕНИЕ МАШИНОЙ
-        if (activeVehicle) {
-            const vehicle = activeVehicle;
+        vehicle.aiAngle += delta * 0.3;
 
-            if (controls.forward) {
-                vehicle.speed += 18 * delta;
-            }
+        vehicle.object.position.x =
+            vehicle.startX +
+            Math.cos(vehicle.aiAngle) * vehicle.aiRadius;
 
-            if (controls.backward) {
-                vehicle.speed -= 18 * delta;
-            }
+        vehicle.object.position.z =
+            vehicle.startZ +
+            Math.sin(vehicle.aiAngle) * vehicle.aiRadius;
 
-            vehicle.speed = THREE.MathUtils.clamp(
-                vehicle.speed,
-                -vehicle.maxSpeed * 0.5,
-                vehicle.maxSpeed
-            );
+        vehicle.object.rotation.y =
+            -vehicle.aiAngle - Math.PI / 2;
 
-            if (controls.handbrake) {
-                vehicle.speed *= 0.88;
-            } else {
-                vehicle.speed *= 0.99;
-            }
-
-            if (controls.left) {
-                vehicle.object.rotation.y +=
-                    vehicle.turnSpeed * delta *
-                    Math.sign(vehicle.speed || 1);
-            }
-
-            if (controls.right) {
-                vehicle.object.rotation.y -=
-                    vehicle.turnSpeed * delta *
-                    Math.sign(vehicle.speed || 1);
-            }
-
-            vehicle.object.position.x +=
-                Math.sin(vehicle.object.rotation.y) *
-                vehicle.speed * delta;
-
-            vehicle.object.position.z +=
-                Math.cos(vehicle.object.rotation.y) *
-                vehicle.speed * delta;
-
-            for (const wheel of vehicle.wheels) {
-                wheel.rotation.x += vehicle.speed * delta;
-            }
-
-            player.position.copy(vehicle.object.position);
+        for (const wheel of vehicle.wheels) {
+            wheel.rotation.x += delta * 2;
         }
     }
 
+    // ПОСАДКА И ВЫХОД
+    if (controls.enterPressed) {
+        if (activeVehicle) {
+            player.position.copy(activeVehicle.object.position);
+            player.position.x += 3;
+            activeVehicle = null;
+            player.mesh.visible = true;
+        } else {
+            const vehicle = nearestVehicle(player);
+
+            if (vehicle) {
+                activeVehicle = vehicle;
+                player.mesh.visible = false;
+                showVehicleMessage(vehicle.name);
+            }
+        }
+
+        controls.enterPressed = false;
+    }
+
+    // УПРАВЛЕНИЕ МАШИНОЙ ИГРОКА
+    if (activeVehicle) {
+        const vehicle = activeVehicle;
+
+        if (controls.forward) vehicle.speed += 18 * delta;
+        if (controls.backward) vehicle.speed -= 18 * delta;
+
+        vehicle.speed = THREE.MathUtils.clamp(
+            vehicle.speed,
+            -vehicle.maxSpeed * 0.5,
+            vehicle.maxSpeed
+        );
+
+        vehicle.speed *= controls.handbrake ? 0.88 : 0.99;
+
+        if (controls.left) {
+            vehicle.object.rotation.y += vehicle.turnSpeed * delta *
+                Math.sign(vehicle.speed || 1);
+        }
+
+        if (controls.right) {
+            vehicle.object.rotation.y -= vehicle.turnSpeed * delta *
+                Math.sign(vehicle.speed || 1);
+        }
+
+        vehicle.object.position.x +=
+            Math.sin(vehicle.object.rotation.y) * vehicle.speed * delta;
+
+        vehicle.object.position.z +=
+            Math.cos(vehicle.object.rotation.y) * vehicle.speed * delta;
+
+        for (const wheel of vehicle.wheels) {
+            wheel.rotation.x += vehicle.speed * delta;
+        }
+
+        player.position.copy(vehicle.object.position);
+    }
+}
     function showVehicleMessage(name) {
         const message = document.getElementById("message");
         if (message) {
