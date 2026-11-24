@@ -97,7 +97,7 @@ export function createWorld(scene) {
         let parkCount = 0;
 
         // ДОРОГИ
-      function addRoad(points, width, roadType) {
+      function addRoad(points, width, tags.highway) {
     const drivable = [
         "motorway", "trunk", "primary",
         "secondary", "tertiary",
