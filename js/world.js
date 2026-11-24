@@ -97,14 +97,13 @@ export function createWorld(scene) {
         let parkCount = 0;
 
         // ДОРОГИ
-        function addRoad(points, width) {
-            for (let i = 0; i < points.length - 1; i++) {
-                const a = toWorld(
-                    points[i].lat, points[i].lon
-                );
-                const b = toWorld(
-                    points[i + 1].lat, points[i + 1].lon
-                );
+       function addRoad(points, width, roadType) {
+    if (!["motorway", "trunk", "primary", "secondary", "tertiary", "residential", "unclassified", "service"].includes(roadType)) return;
+
+    world.userData.roadPaths.push({
+        type: roadType,
+        points: points.map(point => toWorld(point.lat, point.lon))
+    });
 
                 const dx = b.x - a.x;
                 const dz = b.z - a.z;
