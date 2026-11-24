@@ -97,48 +97,55 @@ export function createWorld(scene) {
         let parkCount = 0;
 
         // ДОРОГИ
-       function addRoad(points, width, roadType) {
-    if (!["motorway", "trunk", "primary", "secondary", "tertiary", "residential", "unclassified", "service"].includes(roadType)) return;
+      function addRoad(points, width, roadType) {
+    const drivable = [
+        "motorway", "trunk", "primary",
+        "secondary", "tertiary",
+        "residential", "unclassified", "service"
+    ];
 
-    world.userData.roadPaths.push({
-        type: roadType,
-        points: points.map(point => toWorld(point.lat, point.lon))
-    });
+    if (drivable.includes(roadType)) {
+        world.userData.roadPaths.push({
+            type: roadType,
+            points: points.map(point =>
+                toWorld(point.lat, point.lon)
+            )
+        });
+    }
 
-                const dx = b.x - a.x;
-                const dz = b.z - a.z;
-                const length = Math.sqrt(dx * dx + dz * dz);
+    for (let i = 0; i < points.length - 1; i++) {
+        const a = toWorld(points[i].lat, points[i].lon);
+        const b = toWorld(points[i + 1].lat, points[i + 1].lon);
 
-                if (length < 0.5 || length > 1000) continue;
+        const dx = b.x - a.x;
+        const dz = b.z - a.z;
+        const length = Math.sqrt(dx * dx + dz * dz);
 
-                const nx = -dz / length * width / 2;
-                const nz = dx / length * width / 2;
+        if (length < 0.5 || length > 1000) continue;
 
-                const geometry = new THREE.BufferGeometry();
+        const nx = -dz / length * width / 2;
+        const nz = dx / length * width / 2;
 
-                geometry.setAttribute(
-                    "position",
-                    new THREE.Float32BufferAttribute([
-                        a.x + nx, 0.04, a.z + nz,
-                        a.x - nx, 0.04, a.z - nz,
-                        b.x - nx, 0.04, b.z - nz,
-                        a.x + nx, 0.04, a.z + nz,
-                        b.x - nx, 0.04, b.z - nz,
-                        b.x + nx, 0.04, b.z + nz
-                    ], 3)
-                );
+        const geometry = new THREE.BufferGeometry();
 
-                geometry.computeVertexNormals();
+        geometry.setAttribute("position",
+            new THREE.Float32BufferAttribute([
+                a.x + nx, 0.04, a.z + nz,
+                a.x - nx, 0.04, a.z - nz,
+                b.x - nx, 0.04, b.z - nz,
+                a.x + nx, 0.04, a.z + nz,
+                b.x - nx, 0.04, b.z - nz,
+                b.x + nx, 0.04, b.z + nz
+            ], 3)
+        );
 
-                const mesh = new THREE.Mesh(
-                    geometry, roadMaterial
-                );
+        geometry.computeVertexNormals();
 
-                world.add(mesh);
-                roadCount++;
-            }
-        }
-
+        const mesh = new THREE.Mesh(geometry, roadMaterial);
+        world.add(mesh);
+        roadCount++;
+    }
+}
         // ЗДАНИЯ И ПАРКИ
         function addPolygon(points, material, height = 0) {
             if (!points || points.length < 4) return;
