@@ -3,6 +3,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 
 export function createWorld(scene) {
     const world = new THREE.Group();
+    world.userData.roadPaths = [];
     scene.add(world);
 
     // ОСВЕЩЕНИЕ
